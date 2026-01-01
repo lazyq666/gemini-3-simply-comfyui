@@ -2,6 +2,7 @@ import base64
 import io
 import math
 import os
+import secrets
 from typing import List, Optional
 
 import numpy as np
@@ -46,6 +47,38 @@ def _gather_text_from_parts(parts: List[types.Part]) -> str:
     return "".join(collected).strip()
 
 
+def _supports_field(model_cls, field_name: str) -> bool:
+    """
+    Best-effort check for whether a genai `types.*` model supports a given field.
+    Handles common patterns (pydantic v1/v2, dataclasses). Falls back to False.
+    """
+
+    try:
+        model_fields = getattr(model_cls, "model_fields", None)
+        if isinstance(model_fields, dict):
+            return field_name in model_fields
+
+        fields = getattr(model_cls, "__fields__", None)
+        if isinstance(fields, dict):
+            return field_name in fields
+
+        dataclass_fields = getattr(model_cls, "__dataclass_fields__", None)
+        if isinstance(dataclass_fields, dict):
+            return field_name in dataclass_fields
+    except Exception:
+        return False
+
+    return False
+
+
+INT32_MAX = (2**31) - 1
+
+
+def _random_seed_int32() -> int:
+    # Gemini generation_config.seed is TYPE_INT32 (signed). Keep it in-range.
+    return secrets.randbelow(INT32_MAX + 1)
+
+
 ALLOWED_ASPECTS = [
     ("1:1", 1.0),
     ("2:3", 2 / 3),
@@ -84,6 +117,7 @@ class Gemini3ProPreviewText:
 
     @classmethod
     def INPUT_TYPES(cls):
+        optional_images = {f"image_{idx}": ("IMAGE",) for idx in range(1, 11)}
         return {
             "required": {
                 "api_key": ("STRING", {"default": "", "multiline": False}),
@@ -103,10 +137,7 @@ class Gemini3ProPreviewText:
                     {"default": "default"},
                 ),
             },
-            "optional": {
-                "image_1": ("IMAGE",),
-                "image_2": ("IMAGE",),
-            },
+            "optional": optional_images,
         }
 
     RETURN_TYPES = ("STRING",)
@@ -123,6 +154,14 @@ class Gemini3ProPreviewText:
         thinking_level: str,
         image_1=None,
         image_2=None,
+        image_3=None,
+        image_4=None,
+        image_5=None,
+        image_6=None,
+        image_7=None,
+        image_8=None,
+        image_9=None,
+        image_10=None,
     ):
         if not prompt or not prompt.strip():
             raise ValueError("Prompt is required.")
@@ -133,7 +172,18 @@ class Gemini3ProPreviewText:
         resolution = None if media_resolution == "auto" else media_resolution
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
 
-        for image in (image_1, image_2):
+        for image in (
+            image_1,
+            image_2,
+            image_3,
+            image_4,
+            image_5,
+            image_6,
+            image_7,
+            image_8,
+            image_9,
+            image_10,
+        ):
             if image is not None:
                 parts.append(_tensor_to_part(image, resolution))
 
@@ -177,9 +227,19 @@ class Gemini3ProImagePreview:
                     ["1K", "2K", "4K"],
                     {"default": "1K"},
                 ),
+                "seed": ("INT", {"default": -1, "min": -1, "max": INT32_MAX}),
             },
             "optional": {
                 "reference_image": ("IMAGE",),
+                "reference_image_2": ("IMAGE",),
+                "reference_image_3": ("IMAGE",),
+                "reference_image_4": ("IMAGE",),
+                "reference_image_5": ("IMAGE",),
+                "reference_image_6": ("IMAGE",),
+                "reference_image_7": ("IMAGE",),
+                "reference_image_8": ("IMAGE",),
+                "reference_image_9": ("IMAGE",),
+                "reference_image_10": ("IMAGE",),
             },
         }
 
@@ -195,7 +255,17 @@ class Gemini3ProImagePreview:
         model: str,
         aspect_ratio: str,
         image_size: str,
+        seed: int,
         reference_image=None,
+        reference_image_2=None,
+        reference_image_3=None,
+        reference_image_4=None,
+        reference_image_5=None,
+        reference_image_6=None,
+        reference_image_7=None,
+        reference_image_8=None,
+        reference_image_9=None,
+        reference_image_10=None,
     ):
         if not prompt or not prompt.strip():
             raise ValueError("Prompt is required.")
@@ -204,21 +274,47 @@ class Gemini3ProImagePreview:
         client = genai.Client(api_key=key)
 
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
-        if reference_image is not None:
-            parts.append(_tensor_to_part(reference_image, None))
+        reference_images = [
+            reference_image,
+            reference_image_2,
+            reference_image_3,
+            reference_image_4,
+            reference_image_5,
+            reference_image_6,
+            reference_image_7,
+            reference_image_8,
+            reference_image_9,
+            reference_image_10,
+        ]
+        for image in reference_images:
+            if image is not None:
+                parts.append(_tensor_to_part(image, None))
 
         chosen_aspect = aspect_ratio
         if aspect_ratio == "auto":
-            chosen_aspect = _auto_aspect_ratio([reference_image])
+            chosen_aspect = _auto_aspect_ratio(reference_images)
 
-        image_config = types.ImageConfig(aspect_ratio=chosen_aspect, image_size=image_size)
+        parsed_seed = -1 if seed is None else int(seed)
+        if parsed_seed < 0:
+            resolved_seed = _random_seed_int32()
+        elif parsed_seed > INT32_MAX:
+            raise ValueError(f"Seed must be <= {INT32_MAX} (Gemini expects signed int32).")
+        else:
+            resolved_seed = parsed_seed
+
+        image_config_kwargs = {"aspect_ratio": chosen_aspect, "image_size": image_size}
+        if _supports_field(types.ImageConfig, "seed"):
+            image_config_kwargs["seed"] = resolved_seed
+        image_config = types.ImageConfig(**image_config_kwargs)
+
+        config_kwargs = {"response_modalities": ["IMAGE", "TEXT"], "image_config": image_config}
+        if _supports_field(types.GenerateContentConfig, "seed"):
+            config_kwargs["seed"] = resolved_seed
+
         response = client.models.generate_content(
             model=model,
             contents=[types.Content(role="user", parts=parts)],
-            config=types.GenerateContentConfig(
-                response_modalities=["IMAGE", "TEXT"],
-                image_config=image_config,
-            ),
+            config=types.GenerateContentConfig(**config_kwargs),
         )
 
         candidates = getattr(response, "candidates", None) or []
