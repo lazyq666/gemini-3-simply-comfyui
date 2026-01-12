@@ -2,7 +2,7 @@
 
 Two lightweight ComfyUI nodes for Gemini 3 preview models:
 
-- **Gemini 3 Pro (Text)** – calls `gemini-3-pro-preview`, accepts optional images and media resolution.
+- **Gemini 3 Pro (Text)** – calls `gemini-3-pro-preview`, accepts optional images, media resolution, and a `seed` input.
 - **Gemini 3 Pro Image** – calls `gemini-3-pro-image-preview`, lets you pick aspect ratio and resolution.
 - **Gemini Seed (int32)** – normalizes any seed to a signed int32 for Gemini. Use this before the image node if your workflow produces large seeds.
 - **3D Camera Prompt** – 3D 相机交互控件，输出相机角度对应的 prompt，可显示输入图像。
@@ -18,6 +18,7 @@ Usage notes:
 - When a key hits quota/limit errors, the node automatically tries the next key.
 - Image tensors are auto-converted to PNG for requests and returned as standard ComfyUI `IMAGE`.
 - Image node returns both the generated image and any model text output (captions or system notes).
+- Text node supports a `seed` input (`-1` = random each run). Valid range is `0` to `2147483647` (Gemini expects signed int32).
 - Image node includes a `seed` input (`-1` = random each run). Valid range is `0` to `2147483647` (Gemini expects signed int32).
 - Gemini Seed (int32) supports `random_if_negative`, `wrap`, or `clamp` modes to keep seeds in-range.
 

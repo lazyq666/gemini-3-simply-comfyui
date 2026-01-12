@@ -300,6 +300,7 @@ class Gemini3ProPreviewText:
                     ["default", "low", "high"],
                     {"default": "default"},
                 ),
+                "seed": ("INT", {"default": -1, "min": -1, "max": INT32_MAX}),
             },
             "optional": optional_images,
         }
@@ -316,6 +317,7 @@ class Gemini3ProPreviewText:
         model: str,
         media_resolution: str,
         thinking_level: str,
+        seed: int,
         image_1=None,
         image_2=None,
         image_3=None,
@@ -350,9 +352,19 @@ class Gemini3ProPreviewText:
             if image is not None:
                 parts.append(_tensor_to_part(image, resolution))
 
+        parsed_seed = -1 if seed is None else int(seed)
+        if parsed_seed < 0:
+            resolved_seed = _random_seed_int32()
+        elif parsed_seed > INT32_MAX:
+            raise ValueError(f"Seed must be <= {INT32_MAX} (Gemini expects signed int32).")
+        else:
+            resolved_seed = parsed_seed
+
         config_kwargs = {"response_modalities": ["TEXT"]}
         if thinking_level != "default":
             config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_level=thinking_level)
+        if _supports_field(types.GenerateContentConfig, "seed"):
+            config_kwargs["seed"] = resolved_seed
 
         def _request(client):
             return client.models.generate_content(
