@@ -1,0 +1,609 @@
+
+# ComfyUI Error Report
+## Error Details
+- **Node ID:** 93
+- **Node Type:** Gemini3ProImagePreview
+- **Exception Type:** httpx.ReadError
+- **Exception Message:** [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+
+## Stack Trace
+```
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 516, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 330, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 304, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 292, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\gemini3\nodes.py", line 314, in run
+    response = client.models.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\models.py", line 5203, in generate_content
+    response = self._generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\models.py", line 3985, in _generate_content
+    response = self._api_client.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1388, in request
+    response = self._request(http_request, http_options, stream=False)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1224, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 477, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 378, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 420, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 187, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "concurrent\futures\_base.py", line 449, in result
+
+  File "concurrent\futures\_base.py", line 401, in __get_result
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 480, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1194, in _request_once
+    response = self._httpx_client.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 928, in send
+    raise exc
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 922, in send
+    response.read()
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 881, in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 897, in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 951, in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 153, in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 126, in __iter__
+    with map_httpcore_exceptions():
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "contextlib.py", line 158, in __exit__
+
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+
+```
+## System Information
+- **ComfyUI Version:** 0.7.0
+- **Arguments:** ComfyUI\main.py
+- **OS:** win32
+- **Python Version:** 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+- **Embedded Python:** true
+- **PyTorch Version:** 2.9.1+cu126
+## Devices
+
+- **Name:** cuda:0 NVIDIA GeForce RTX 4080 : cudaMallocAsync
+  - **Type:** cuda
+  - **VRAM Total:** 17170956288
+  - **VRAM Free:** 15778971648
+  - **Torch VRAM Total:** 0
+  - **Torch VRAM Free:** 0
+
+## Logs
+```
+2026-01-05T14:38:16.433332 - 
+2026-01-05T14:38:16.437332 - Building wheels for collected packages: googletrans-py
+2026-01-05T14:38:16.437332 - 
+2026-01-05T14:38:16.440332 -   Building wheel for googletrans-py (pyproject.toml): started
+2026-01-05T14:38:16.440332 - 
+2026-01-05T14:38:16.908789 -   Building wheel for googletrans-py (pyproject.toml): finished with status 'done'
+2026-01-05T14:38:16.909789 - 
+2026-01-05T14:38:16.913790 -   Created wheel for googletrans-py: filename=googletrans_py-4.0.0-py3-none-any.whl size=13137 sha256=3746c22e1e650f5cb852b7993d2aec80fc44479d0cf72a09dcc51f45b84f2c15
+2026-01-05T14:38:16.913790 - 
+2026-01-05T14:38:16.913790 -   Stored in directory: c:\users\jm\appdata\local\pip\cache\wheels\d7\77\86\56a6d2caf2420c4f8f062d014fdf011477f213718ef9aae7d2
+2026-01-05T14:38:16.913790 - 
+2026-01-05T14:38:16.916789 - Successfully built googletrans-py
+2026-01-05T14:38:16.916789 - 
+2026-01-05T14:38:17.210917 - Installing collected packages: googletrans-py
+2026-01-05T14:38:17.210917 - 
+2026-01-05T14:38:17.264751 - Successfully installed googletrans-py-4.0.0
+2026-01-05T14:38:17.264751 - 
+2026-01-05T14:38:17.792948 -   Resolved https://github.com/argosopentech/argos-translate.git to commit 08f017c324628434d671cf4d191ce681c620ff33
+2026-01-05T14:38:17.792948 - 
+2026-01-05T14:38:17.851480 -   Installing build dependencies: started
+2026-01-05T14:38:17.851480 - 
+2026-01-05T14:38:20.987634 -   Installing build dependencies: finished with status 'done'
+2026-01-05T14:38:20.987634 - 
+2026-01-05T14:38:20.988634 -   Getting requirements to build wheel: started
+2026-01-05T14:38:20.988634 - 
+2026-01-05T14:38:21.225536 -   Getting requirements to build wheel: finished with status 'error'
+2026-01-05T14:38:21.225536 - 
+2026-01-05T14:38:21.228535 -   error: subprocess-exited-with-error
+2026-01-05T14:38:21.228535 - 
+2026-01-05T14:38:21.228535 -   
+2026-01-05T14:38:21.228535 - 
+2026-01-05T14:38:21.229535 -   Getting requirements to build wheel did not run successfully.
+2026-01-05T14:38:21.229535 - 
+2026-01-05T14:38:21.229535 -   exit code: 1
+2026-01-05T14:38:21.229535 - 
+2026-01-05T14:38:21.229535 -   
+2026-01-05T14:38:21.229535 - 
+2026-01-05T14:38:21.230535 -   [20 lines of output]
+2026-01-05T14:38:21.230535 - 
+2026-01-05T14:38:21.230535 -   Traceback (most recent call last):
+2026-01-05T14:38:21.230535 - 
+2026-01-05T14:38:21.230535 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 389, in <module>
+2026-01-05T14:38:21.230535 - 
+2026-01-05T14:38:21.230535 -       main()
+2026-01-05T14:38:21.230535 - 
+2026-01-05T14:38:21.231536 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 373, in main
+2026-01-05T14:38:21.231536 - 
+2026-01-05T14:38:21.231536 -       json_out["return_val"] = hook(**hook_input["kwargs"])
+2026-01-05T14:38:21.231536 - 
+2026-01-05T14:38:21.231536 -                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-05T14:38:21.231536 - 
+2026-01-05T14:38:21.231536 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 143, in get_requires_for_build_wheel
+2026-01-05T14:38:21.231536 - 
+2026-01-05T14:38:21.232535 -       return hook(config_settings)
+2026-01-05T14:38:21.232535 - 
+2026-01-05T14:38:21.232535 -              ^^^^^^^^^^^^^^^^^^^^^
+2026-01-05T14:38:21.232535 - 
+2026-01-05T14:38:21.232535 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\setuptools\build_meta.py", line 327, in get_requires_for_build_wheel
+2026-01-05T14:38:21.232535 - 
+2026-01-05T14:38:21.232535 -       return self._get_build_requires(config_settings, requirements=[])
+2026-01-05T14:38:21.232535 - 
+2026-01-05T14:38:21.233535 -              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-05T14:38:21.233535 - 
+2026-01-05T14:38:21.233535 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\setuptools\build_meta.py", line 297, in _get_build_requires
+2026-01-05T14:38:21.234536 - 
+2026-01-05T14:38:21.234536 -       self.run_setup()
+2026-01-05T14:38:21.234536 - 
+2026-01-05T14:38:21.234536 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\setuptools\build_meta.py", line 497, in run_setup
+2026-01-05T14:38:21.234536 - 
+2026-01-05T14:38:21.234536 -       super().run_setup(setup_script=setup_script)
+2026-01-05T14:38:21.234536 - 
+2026-01-05T14:38:21.235536 -     File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\setuptools\build_meta.py", line 313, in run_setup
+2026-01-05T14:38:21.235536 - 
+2026-01-05T14:38:21.235536 -       exec(code, locals())
+2026-01-05T14:38:21.235536 - 
+2026-01-05T14:38:21.235536 -     File "<string>", line 7, in <module>
+2026-01-05T14:38:21.235536 - 
+2026-01-05T14:38:21.235536 -   UnicodeDecodeError: 'gbk' codec can't decode byte 0x92 in position 1011: illegal multibyte sequence
+2026-01-05T14:38:21.235536 - 
+2026-01-05T14:38:21.236536 -   [end of output]
+2026-01-05T14:38:21.236536 - 
+2026-01-05T14:38:21.236536 -   
+2026-01-05T14:38:21.236536 - 
+2026-01-05T14:38:21.236536 -   note: This error originates from a subprocess, and is likely not a problem with pip.
+2026-01-05T14:38:21.236536 - 
+2026-01-05T14:38:21.241535 - ERROR: Failed to build 'git+https://github.com/argosopentech/argos-translate.git@08f017c324628434d671cf4d191ce681c620ff33' when getting requirements to build wheel
+2026-01-05T14:38:21.241535 - 
+2026-01-05T14:38:21.345097 - FETCH ComfyRegistry Data: 10/1172026-01-05T14:38:21.345097 - 
+2026-01-05T14:38:26.963517 - [ChatGLMNode] File config.js file not found! Create default config.json...2026-01-05T14:38:26.963517 - 
+2026-01-05T14:38:26.985469 - [1;35m
+### [START] ComfyUI AlekPet Nodes [1;34mv1.0.89[0m[1;35m ###[0m2026-01-05T14:38:26.985469 - 
+2026-01-05T14:38:26.985469 - [92mNode -> ArgosTranslateNode: [93mArgosTranslateCLIPTextEncodeNode, ArgosTranslateTextNode[0m [92m[1;31;40m [Failed][0m[0m2026-01-05T14:38:26.986468 - 
+2026-01-05T14:38:26.986468 - [92mNode -> ChatGLMNode[92m[92m[Loading][0m[0m2026-01-05T14:38:26.986468 - 
+2026-01-05T14:38:26.986468 - [92mNode -> DeepTranslatorNode: [93mDeepTranslatorCLIPTextEncodeNode, DeepTranslatorTextNode[0m [92m[92m[Loading][0m[0m2026-01-05T14:38:26.986468 - 
+2026-01-05T14:38:26.986468 - [92mNode -> ExtrasNode: [93mPreviewTextNode, HexToHueNode, ColorsCorrectNode[0m [92m[92m[Loading][0m[0m2026-01-05T14:38:26.987468 - 
+2026-01-05T14:38:26.987468 - [92mNode -> GoogleTranslateNode: [93mGoogleTranslateCLIPTextEncodeNode, GoogleTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-05T14:38:26.987468 - 
+2026-01-05T14:38:26.987468 - [92mNode -> IDENode: [93mIDENode[0m [92m[92m[Loading][0m[0m2026-01-05T14:38:26.987468 - 
+2026-01-05T14:38:26.987468 - [92mNode -> PainterNode: [93mPainterNode[0m [92m[92m[Loading][0m[0m2026-01-05T14:38:26.987468 - 
+2026-01-05T14:38:26.988468 - [92mNode -> PoseNode: [93mPoseNode[0m [92m[92m[Loading][0m[0m2026-01-05T14:38:26.988468 - 
+2026-01-05T14:38:26.988468 - [92m
+[1;31;40m* Nodes have been temporarily disabled due to the error or specially *[0m
+[93mArgosTranslateNode -> [1;31;40mNo module named 'argostranslate'[0m
+[0m2026-01-05T14:38:26.988468 - 
+2026-01-05T14:38:26.988468 - [1;35m### [END] ComfyUI AlekPet Nodes ###[0m2026-01-05T14:38:26.989468 - 
+2026-01-05T14:38:28.054098 - 
+2026-01-05T14:38:28.055099 - [92m[rgthree-comfy] Loaded 48 exciting nodes. 🎉[0m2026-01-05T14:38:28.055099 - 
+2026-01-05T14:38:28.055099 - 
+2026-01-05T14:38:28.055099 - [33m[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
+[0m2026-01-05T14:38:28.056098 - 
+2026-01-05T14:38:28.480852 - [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m2026-01-05T14:38:28.480852 - 
+2026-01-05T14:38:28.480852 - [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\was-node-suite-comfyui\was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m2026-01-05T14:38:28.481854 - 
+2026-01-05T14:38:28.892270 - [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m220[0m [32mnodes successfully.[0m2026-01-05T14:38:28.893272 - 
+2026-01-05T14:38:28.893272 - 
+	[3m[93m"Don't let yesterday take up too much of today."[0m[3m - Will Rogers[0m
+2026-01-05T14:38:28.893272 - 
+2026-01-05T14:38:28.915271 - 
+Import times for custom nodes:
+2026-01-05T14:38:28.915271 -    0.0 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\websocket_image_save.py
+2026-01-05T14:38:28.916272 -    0.0 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\LoadTextBatch.py
+2026-01-05T14:38:28.916272 -    0.0 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\cg-use-everywhere
+2026-01-05T14:38:28.916272 -    0.0 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-custom-scripts
+2026-01-05T14:38:28.916272 -    0.0 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\ComfyUI-LG_HotReload
+2026-01-05T14:38:28.917270 -    0.0 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\rgthree-comfy
+2026-01-05T14:38:28.918272 -    0.1 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-kjnodes
+2026-01-05T14:38:28.918272 -    0.1 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui_layerstyle
+2026-01-05T14:38:28.919271 -    0.2 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\ComfyUI-Manager
+2026-01-05T14:38:28.919271 -    0.9 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\was-node-suite-comfyui
+2026-01-05T14:38:28.919271 -    0.9 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\gemini3
+2026-01-05T14:38:28.919271 -    4.1 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes
+2026-01-05T14:38:28.920270 -   19.4 seconds: C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui_custom_nodes_alekpet
+2026-01-05T14:38:28.920270 - 
+2026-01-05T14:38:29.194417 - FETCH ComfyRegistry Data: 15/1172026-01-05T14:38:29.195417 - 
+2026-01-05T14:38:29.301424 - Context impl SQLiteImpl.
+2026-01-05T14:38:29.302423 - Will assume non-transactional DDL.
+2026-01-05T14:38:29.303425 - No target revision found.
+2026-01-05T14:38:29.470411 - Starting server
+
+2026-01-05T14:38:29.471411 - To see the GUI go to: http://127.0.0.1:8188
+2026-01-05T14:38:37.294953 - FETCH ComfyRegistry Data: 20/1172026-01-05T14:38:37.294953 - 
+2026-01-05T14:38:45.222787 - FETCH ComfyRegistry Data: 25/1172026-01-05T14:38:45.222787 - 
+2026-01-05T14:38:53.023866 - FETCH ComfyRegistry Data: 30/1172026-01-05T14:38:53.023866 - 
+2026-01-05T14:38:57.848135 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /scripts/ui.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-05T14:38:57.850135 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/groupNode.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-05T14:38:57.852135 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe-lightbox.esm.min.js2026-01-05T14:38:57.852135 - 
+2026-01-05T14:38:57.857021 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe.min.css2026-01-05T14:38:57.857021 - 
+2026-01-05T14:38:57.893277 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/model-viewer.min.js2026-01-05T14:38:57.893277 - 
+2026-01-05T14:38:57.897283 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/classic.min.css2026-01-05T14:38:57.898277 - 
+2026-01-05T14:38:57.902277 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.css2026-01-05T14:38:57.902277 - 
+2026-01-05T14:38:58.276778 - Cannot connect to comfyregistry.2026-01-05T14:38:58.277777 - 
+2026-01-05T14:38:58.294776 - FETCH DATA from: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/custom-node-list.json2026-01-05T14:38:58.294776 - 2026-01-05T14:38:58.646679 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/pickr.min.js2026-01-05T14:38:58.646679 - 
+2026-01-05T14:38:58.647680 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.min.js2026-01-05T14:38:58.647680 - 
+2026-01-05T14:38:58.857254 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /scripts/ui/components/button.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-05T14:38:58.858254 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /scripts/ui/components/buttonGroup.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-05T14:38:59.879673 -  [DONE]2026-01-05T14:38:59.879673 - 
+2026-01-05T14:38:59.966580 - [ComfyUI-Manager] All startup tasks have been completed.
+2026-01-05T14:40:40.123025 - got prompt
+2026-01-05T14:40:41.616011 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:40:42.569065 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:40:43.214992 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:40:44.303110 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:40:44.995905 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:40:49.919122 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:41:06.719309 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:41:07.941492 - Warning: there are non-text parts in the response: ['inline_data'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+2026-01-05T14:41:12.870669 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:41:29.898922 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:41:36.252951 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:41:52.650650 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:41:59.274694 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:42:18.995667 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:42:25.142101 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:42:41.348826 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:42:42.731209 - Prompt executed in 122.60 seconds
+2026-01-05T14:43:05.270037 - got prompt
+2026-01-05T14:43:10.158247 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:43:26.972755 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:43:28.762129 - Prompt executed in 23.49 seconds
+2026-01-05T14:46:52.973219 - got prompt
+2026-01-05T14:46:54.568310 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:46:59.459258 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:47:14.248796 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:47:20.661256 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:47:40.227983 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:47:42.798619 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:47:47.660008 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:48:02.218656 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:48:05.190264 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:48:10.051412 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:48:27.104042 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:48:30.013275 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:48:34.858353 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:48:51.364378 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:48:54.659753 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:48:54.663613 - Prompt executed in 121.69 seconds
+2026-01-05T14:49:04.953037 - got prompt
+2026-01-05T14:49:09.877305 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:49:25.498812 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:49:32.135178 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:49:48.809986 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:49:55.213581 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:50:12.211752 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:50:18.412246 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:50:35.543881 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:50:35.568055 - !!! Exception during processing !!! [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+2026-01-05T14:50:35.578054 - Traceback (most recent call last):
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 127, in __iter__
+    for part in self._httpcore_stream:
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\connection_pool.py", line 407, in __iter__
+    raise exc from None
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\connection_pool.py", line 403, in __iter__
+    for part in self._stream:
+                ^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 342, in __iter__
+    raise exc
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 334, in __iter__
+    for chunk in self._connection._receive_response_body(**kwargs):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 203, in _receive_response_body
+    event = self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 217, in _receive_event
+    data = self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_backends\sync.py", line 126, in read
+    with map_exceptions(exc_map):
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "contextlib.py", line 158, in __exit__
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ReadError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 516, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 330, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 304, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 292, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\gemini3\nodes.py", line 314, in run
+    response = client.models.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\models.py", line 5203, in generate_content
+    response = self._generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\models.py", line 3985, in _generate_content
+    response = self._api_client.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1388, in request
+    response = self._request(http_request, http_options, stream=False)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1224, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 477, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 378, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 420, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 187, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "concurrent\futures\_base.py", line 449, in result
+  File "concurrent\futures\_base.py", line 401, in __get_result
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 480, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1194, in _request_once
+    response = self._httpx_client.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 928, in send
+    raise exc
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 922, in send
+    response.read()
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 881, in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 897, in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 951, in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 153, in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 126, in __iter__
+    with map_httpcore_exceptions():
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "contextlib.py", line 158, in __exit__
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+
+2026-01-05T14:50:35.586054 - Prompt executed in 90.63 seconds
+2026-01-05T14:50:36.574707 - 
+[94m[LG_HotReload] 开始重载模块: gemini3[0m2026-01-05T14:50:36.574707 - 
+2026-01-05T14:50:36.575216 - [96m[LG_HotReload] 未发现需要清理的路由[0m2026-01-05T14:50:36.575216 - 
+2026-01-05T14:50:36.587215 - [92m[LG_HotReload] 模块重载成功: gemini3[0m2026-01-05T14:50:36.587215 - 
+2026-01-05T14:50:36.588215 - [94m[LG_HotReload] 检查节点注册状态:[0m2026-01-05T14:50:36.588215 - 
+2026-01-05T14:50:36.588215 - [92m[LG_HotReload] 节点 Gemini3ProPreviewText 已成功注册[0m2026-01-05T14:50:36.588215 - 
+2026-01-05T14:50:36.588215 - [92m[LG_HotReload] 节点 Gemini3ProImagePreview 已成功注册[0m2026-01-05T14:50:36.588215 - 
+2026-01-05T14:50:36.589214 - [92m[LG_HotReload] Successfully reloaded module: gemini3[0m2026-01-05T14:50:36.589214 - 
+2026-01-05T14:51:06.161195 - got prompt
+2026-01-05T14:51:31.281129 - got prompt
+2026-01-05T14:51:31.299129 - got prompt
+2026-01-05T14:51:31.905688 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe-lightbox.esm.min.js2026-01-05T14:51:31.905688 - 
+2026-01-05T14:51:31.916699 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe.min.css2026-01-05T14:51:31.917699 - 
+2026-01-05T14:51:31.920698 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/pickr.min.js2026-01-05T14:51:31.920698 - 
+2026-01-05T14:51:31.936699 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/model-viewer.min.js2026-01-05T14:51:31.936699 - 
+2026-01-05T14:51:31.940698 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/classic.min.css2026-01-05T14:51:31.940698 - 
+2026-01-05T14:51:32.146567 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.css2026-01-05T14:51:32.147567 - 
+2026-01-05T14:51:32.161566 - C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.min.js2026-01-05T14:51:32.161566 - 
+2026-01-05T14:51:33.975717 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:51:51.588862 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:51:52.887007 - Prompt executed in 21.63 seconds
+2026-01-05T14:51:55.620168 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:52:14.123281 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:52:16.431498 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:52:16.712070 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:52:19.240477 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:52:36.044629 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:52:40.135836 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:52:56.055234 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:52:59.463691 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:53:02.031923 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:53:22.038478 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:53:24.407368 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:53:26.982400 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:53:42.634352 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:53:46.650946 - HTTP Request: POST https://translate.google.com/_/TranslateWebserverUi/data/batchexecute?rpcids=MkEWBc&bl=boq_translate-webserver_20201207.13_p0&soc-app=1&soc-platform=1&soc-device=1&rt=c "HTTP/2 200 OK"
+2026-01-05T14:53:46.660882 - Prompt executed in 113.61 seconds
+2026-01-05T14:53:46.867882 - Prompt executed in 0.02 seconds
+2026-01-05T14:54:52.762645 - got prompt
+2026-01-05T14:54:55.541252 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:55:18.033512 - got prompt
+2026-01-05T14:55:20.198976 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:55:24.531379 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:55:41.660807 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:55:45.853042 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:56:04.351345 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:56:09.017743 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:56:31.247623 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:56:42.536795 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:56:59.357329 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:57:01.106115 - Prompt executed in 128.34 seconds
+2026-01-05T14:57:04.008816 - AFC is enabled with max remote calls: 10.
+2026-01-05T14:57:26.148627 - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent "HTTP/1.1 200 OK"
+2026-01-05T14:57:26.169940 - !!! Exception during processing !!! [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+2026-01-05T14:57:26.171941 - Traceback (most recent call last):
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 127, in __iter__
+    for part in self._httpcore_stream:
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\connection_pool.py", line 407, in __iter__
+    raise exc from None
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\connection_pool.py", line 403, in __iter__
+    for part in self._stream:
+                ^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 342, in __iter__
+    raise exc
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 334, in __iter__
+    for chunk in self._connection._receive_response_body(**kwargs):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 203, in _receive_response_body
+    event = self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_sync\http11.py", line 217, in _receive_event
+    data = self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_backends\sync.py", line 126, in read
+    with map_exceptions(exc_map):
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "contextlib.py", line 158, in __exit__
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpcore\_exceptions.py", line 14, in map_exceptions
+    raise to_exc(exc) from exc
+httpcore.ReadError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 516, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 330, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 304, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\execution.py", line 292, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\ComfyUI\custom_nodes\gemini3\nodes.py", line 314, in run
+    response = client.models.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\models.py", line 5203, in generate_content
+    response = self._generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\models.py", line 3985, in _generate_content
+    response = self._api_client.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1388, in request
+    response = self._request(http_request, http_options, stream=False)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1224, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 477, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 378, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 420, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 187, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "concurrent\futures\_base.py", line 449, in result
+  File "concurrent\futures\_base.py", line 401, in __get_result
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\tenacity\__init__.py", line 480, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\google\genai\_api_client.py", line 1194, in _request_once
+    response = self._httpx_client.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 928, in send
+    raise exc
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 922, in send
+    response.read()
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 881, in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 897, in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_models.py", line 951, in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_client.py", line 153, in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 126, in __iter__
+    with map_httpcore_exceptions():
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "contextlib.py", line 158, in __exit__
+  File "C:\ComfyUI_windows_portable_nvidia_cu126\ComfyUI_windows_portable\python_embeded\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadError: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:2580)
+
+2026-01-05T14:57:26.180941 - Prompt executed in 24.90 seconds
+
+```
+## Attached Workflow
+Please make sure that workflow does not contain any sensitive information such as API keys or passwords.
+```
+Workflow too large. Please manually upload the workflow from local file system.
+```
+
+## Additional Context
+(Please add any additional context or steps to reproduce the error here)

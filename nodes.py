@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import math
 import os
 import secrets
@@ -12,11 +13,82 @@ from google import genai
 from google.genai import types
 
 
-def _require_api_key(user_key: str) -> str:
-    key = (user_key or os.getenv("GEMINI_API_KEY", "")).strip()
-    if not key:
-        raise ValueError("API key is required. Provide it in the node or set GEMINI_API_KEY.")
-    return key
+CONFIG_FILENAME = "config.json"
+
+
+def _dedupe_keys(values: List[str]) -> List[str]:
+    seen = set()
+    cleaned = []
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        key = value.strip()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(key)
+    return cleaned
+
+
+def _load_api_keys_from_config() -> List[str]:
+    config_path = os.path.join(os.path.dirname(__file__), CONFIG_FILENAME)
+    if not os.path.exists(config_path):
+        return []
+    try:
+        with open(config_path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except Exception as exc:
+        raise ValueError(f"Failed to load {CONFIG_FILENAME}: {exc}") from exc
+
+    keys = data.get("api_keys", [])
+    if isinstance(keys, str):
+        keys = [keys]
+    if not isinstance(keys, list):
+        raise ValueError(f"{CONFIG_FILENAME} api_keys must be a list of strings.")
+    return _dedupe_keys(keys)
+
+
+def _resolve_api_keys(user_key: str) -> List[str]:
+    env_key = os.getenv("GEMINI_API_KEY", "")
+    keys = _dedupe_keys([user_key] + _load_api_keys_from_config() + [env_key])
+    if not keys:
+        raise ValueError(
+            "API key is required. Provide it in the node, add it to config.json, or set GEMINI_API_KEY."
+        )
+    return keys
+
+
+def _is_quota_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    if any(token in message for token in ("resource_exhausted", "quota", "rate limit", "429")):
+        return True
+
+    for attr in ("status_code", "code"):
+        code = getattr(exc, attr, None)
+        if callable(code):
+            try:
+                code = code()
+            except Exception:
+                code = None
+        if code == 429 or str(code).upper() == "RESOURCE_EXHAUSTED":
+            return True
+    return False
+
+
+def _run_with_key_rotation(api_keys: List[str], request_fn):
+    last_quota_error = None
+    for key in api_keys:
+        client = genai.Client(api_key=key)
+        try:
+            return request_fn(client)
+        except Exception as exc:
+            if _is_quota_error(exc):
+                last_quota_error = exc
+                continue
+            raise
+    if last_quota_error is not None:
+        raise last_quota_error
+    raise ValueError("No valid API key available.")
 
 
 def _tensor_to_part(image_tensor: torch.Tensor, media_resolution: Optional[str]) -> types.Part:
@@ -77,6 +149,19 @@ INT32_MAX = (2**31) - 1
 def _random_seed_int32() -> int:
     # Gemini generation_config.seed is TYPE_INT32 (signed). Keep it in-range.
     return secrets.randbelow(INT32_MAX + 1)
+
+
+def _normalize_seed_int32(seed: Optional[int], mode: str) -> int:
+    parsed_seed = 0 if seed is None else int(seed)
+    if mode == "random_if_negative" and parsed_seed < 0:
+        return _random_seed_int32()
+    if mode == "clamp":
+        if parsed_seed < 0:
+            return 0
+        if parsed_seed > INT32_MAX:
+            return INT32_MAX
+        return parsed_seed
+    return parsed_seed % (INT32_MAX + 1)
 
 
 ALLOWED_ASPECTS = [
@@ -166,8 +251,7 @@ class Gemini3ProPreviewText:
         if not prompt or not prompt.strip():
             raise ValueError("Prompt is required.")
 
-        key = _require_api_key(api_key)
-        client = genai.Client(api_key=key)
+        api_keys = _resolve_api_keys(api_key)
 
         resolution = None if media_resolution == "auto" else media_resolution
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
@@ -191,11 +275,14 @@ class Gemini3ProPreviewText:
         if thinking_level != "default":
             config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_level=thinking_level)
 
-        response = client.models.generate_content(
-            model=model,
-            contents=[types.Content(role="user", parts=parts)],
-            config=types.GenerateContentConfig(**config_kwargs),
-        )
+        def _request(client):
+            return client.models.generate_content(
+                model=model,
+                contents=[types.Content(role="user", parts=parts)],
+                config=types.GenerateContentConfig(**config_kwargs),
+            )
+
+        response = _run_with_key_rotation(api_keys, _request)
 
         parts_out: List[types.Part] = []
         if getattr(response, "candidates", None):
@@ -205,6 +292,30 @@ class Gemini3ProPreviewText:
 
         text = (response.text or _gather_text_from_parts(parts_out)).strip()
         return (text,)
+
+
+class GeminiSeedInt32:
+    """
+    Seed helper that normalizes any integer into a Gemini-friendly signed int32.
+    """
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
+                "mode": (["random_if_negative", "wrap", "clamp"], {"default": "random_if_negative"}),
+            }
+        }
+
+    RETURN_TYPES = ("INT",)
+    RETURN_NAMES = ("seed",)
+    FUNCTION = "run"
+    CATEGORY = "Gemini 3"
+
+    def run(self, seed: int, mode: str):
+        resolved_seed = _normalize_seed_int32(seed, mode)
+        return (resolved_seed,)
 
 
 class Gemini3ProImagePreview:
@@ -270,8 +381,7 @@ class Gemini3ProImagePreview:
         if not prompt or not prompt.strip():
             raise ValueError("Prompt is required.")
 
-        key = _require_api_key(api_key)
-        client = genai.Client(api_key=key)
+        api_keys = _resolve_api_keys(api_key)
 
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
         reference_images = [
@@ -311,11 +421,14 @@ class Gemini3ProImagePreview:
         if _supports_field(types.GenerateContentConfig, "seed"):
             config_kwargs["seed"] = resolved_seed
 
-        response = client.models.generate_content(
-            model=model,
-            contents=[types.Content(role="user", parts=parts)],
-            config=types.GenerateContentConfig(**config_kwargs),
-        )
+        def _request(client):
+            return client.models.generate_content(
+                model=model,
+                contents=[types.Content(role="user", parts=parts)],
+                config=types.GenerateContentConfig(**config_kwargs),
+            )
+
+        response = _run_with_key_rotation(api_keys, _request)
 
         candidates = getattr(response, "candidates", None) or []
         candidate = candidates[0] if candidates else None
@@ -337,10 +450,12 @@ class Gemini3ProImagePreview:
 
 NODE_CLASS_MAPPINGS = {
     "Gemini3ProPreviewText": Gemini3ProPreviewText,
+    "GeminiSeedInt32": GeminiSeedInt32,
     "Gemini3ProImagePreview": Gemini3ProImagePreview,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Gemini3ProPreviewText": "Gemini 3 Pro (Text)",
+    "GeminiSeedInt32": "Gemini Seed (int32)",
     "Gemini3ProImagePreview": "Gemini 3 Pro Image",
 }
