@@ -111,12 +111,65 @@ def _bytes_to_tensor(image_bytes: bytes) -> torch.Tensor:
     return torch.from_numpy(array)[None, ...]
 
 
+def _tensor_to_base64_jpeg(image_tensor: torch.Tensor, quality: int = 75) -> str:
+    array = np.clip(image_tensor[0].cpu().numpy() * 255.0, 0, 255).astype(np.uint8)
+    pil_image = Image.fromarray(array).convert("RGB")
+    buffer = io.BytesIO()
+    pil_image.save(buffer, format="JPEG", quality=quality)
+    return base64.b64encode(buffer.getvalue()).decode("ascii")
+
+
 def _gather_text_from_parts(parts: List[types.Part]) -> str:
     collected = []
     for part in parts:
         if getattr(part, "text", None):
             collected.append(part.text)
     return "".join(collected).strip()
+
+
+AZIMUTH_MAP = {
+    0: "front view",
+    45: "front-right quarter view",
+    90: "right side view",
+    135: "back-right quarter view",
+    180: "back view",
+    225: "back-left quarter view",
+    270: "left side view",
+    315: "front-left quarter view",
+}
+
+ELEVATION_MAP = {
+    -30: "low-angle shot",
+    0: "eye-level shot",
+    30: "elevated shot",
+    60: "high-angle shot",
+}
+
+DISTANCE_MAP = {
+    0.6: "close-up",
+    1.0: "medium shot",
+    1.8: "wide shot",
+}
+
+
+def _snap_to_nearest(value: float, options: List[float]) -> float:
+    return min(options, key=lambda x: abs(x - value))
+
+
+def _normalize_azimuth(value: float) -> float:
+    return float(value) % 360.0
+
+
+def _build_camera_prompt(azimuth: float, elevation: float, distance: float) -> str:
+    azimuth = _normalize_azimuth(azimuth)
+    azimuth_snapped = _snap_to_nearest(azimuth, list(AZIMUTH_MAP.keys()))
+    elevation_snapped = _snap_to_nearest(float(elevation), list(ELEVATION_MAP.keys()))
+    distance_snapped = _snap_to_nearest(float(distance), list(DISTANCE_MAP.keys()))
+    return (
+        f"{AZIMUTH_MAP[azimuth_snapped]} "
+        f"{ELEVATION_MAP[elevation_snapped]} "
+        f"{DISTANCE_MAP[distance_snapped]}"
+    )
 
 
 def _supports_field(model_cls, field_name: str) -> bool:
@@ -192,6 +245,32 @@ def _auto_aspect_ratio(images: List[torch.Tensor]) -> str:
         except Exception:
             continue
     return "1:1"
+
+
+class Gemini3Camera3DPrompt:
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("prompt",)
+    FUNCTION = "build_prompt"
+    CATEGORY = "Gemini3/Camera"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "azimuth": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 360.0, "step": 1.0}),
+                "elevation": ("FLOAT", {"default": 0.0, "min": -30.0, "max": 60.0, "step": 1.0}),
+                "distance": ("FLOAT", {"default": 1.0, "min": 0.6, "max": 1.8, "step": 0.05}),
+            },
+            "optional": {"image": ("IMAGE",)},
+        }
+
+    def build_prompt(self, azimuth: float, elevation: float, distance: float, image=None):
+        prompt = _build_camera_prompt(azimuth, elevation, distance)
+        result = (prompt,)
+        if image is None or not isinstance(image, torch.Tensor) or image.numel() == 0:
+            return result
+        img_base64 = _tensor_to_base64_jpeg(image)
+        return {"ui": {"bg_image": [img_base64]}, "result": result}
 
 
 class Gemini3ProPreviewText:
@@ -449,12 +528,14 @@ class Gemini3ProImagePreview:
 
 
 NODE_CLASS_MAPPINGS = {
+    "Gemini3Camera3DPrompt": Gemini3Camera3DPrompt,
     "Gemini3ProPreviewText": Gemini3ProPreviewText,
     "GeminiSeedInt32": GeminiSeedInt32,
     "Gemini3ProImagePreview": Gemini3ProImagePreview,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "Gemini3Camera3DPrompt": "3D Camera Prompt",
     "Gemini3ProPreviewText": "Gemini 3 Pro (Text)",
     "GeminiSeedInt32": "Gemini Seed (int32)",
     "Gemini3ProImagePreview": "Gemini 3 Pro Image",

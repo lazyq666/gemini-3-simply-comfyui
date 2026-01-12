@@ -5,6 +5,12 @@ Two lightweight ComfyUI nodes for Gemini 3 preview models:
 - **Gemini 3 Pro (Text)** – calls `gemini-3-pro-preview`, accepts optional images and media resolution.
 - **Gemini 3 Pro Image** – calls `gemini-3-pro-image-preview`, lets you pick aspect ratio and resolution.
 - **Gemini Seed (int32)** – normalizes any seed to a signed int32 for Gemini. Use this before the image node if your workflow produces large seeds.
+- **3D Camera Prompt** – 3D 相机交互控件，输出相机角度对应的 prompt，可显示输入图像。
+
+3D Camera Prompt 参数说明（中文）：
+- **azimuth**：水平旋转角（0°=正面，90°=右侧，180°=背面，270°=左侧）。会自动吸附到 8 个视角。
+- **elevation**：垂直仰俯角（-30°=低机位，0°=平视，60°=高机位）。会自动吸附到 4 个高度。
+- **distance**：镜头远近（0.6=近景，1.0=中景，1.8=远景）。会自动吸附到 3 个距离档位。
 
 Usage notes:
 - Preferred: put API keys in `config.json` (ignored by git). The node input can still override.
