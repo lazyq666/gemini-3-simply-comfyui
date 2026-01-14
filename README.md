@@ -9,7 +9,7 @@ Lightweight ComfyUI nodes for Gemini 3 preview models, plus a seed helper and a 
 - Image generation for `gemini-3-pro-image-preview` with aspect ratio and size controls.
 - Seed helper to normalize any value into Gemini's signed int32 range.
 - 3D camera prompt widget with snapping camera angles and optional background image.
-![alt text](3D Camera Prompt.png)
+![alt text](3dCamera.png)
 
 - 支持 `gemini-3-pro-preview` 的文本/多模态输入。
 - 支持 `gemini-3-pro-image-preview` 的图像生成（比例与尺寸可控）。
