@@ -75,6 +75,35 @@ def _is_quota_error(exc: Exception) -> bool:
     return False
 
 
+def _is_model_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    model_tokens = (
+        "unsupported model",
+        "unknown model",
+        "invalid model",
+        "model not found",
+        "no such model",
+        "model does not exist",
+        "is not supported for",
+        "not found for api version",
+    )
+    if any(token in message for token in model_tokens):
+        return True
+    if "model" in message and ("not found" in message or "does not exist" in message):
+        return True
+
+    for attr in ("status_code", "code"):
+        code = getattr(exc, attr, None)
+        if callable(code):
+            try:
+                code = code()
+            except Exception:
+                code = None
+        if code == 404 or str(code).upper() == "NOT_FOUND":
+            return True
+    return False
+
+
 def _run_with_key_rotation(api_keys: List[str], request_fn):
     last_quota_error = None
     for key in api_keys:
@@ -89,6 +118,90 @@ def _run_with_key_rotation(api_keys: List[str], request_fn):
     if last_quota_error is not None:
         raise last_quota_error
     raise ValueError("No valid API key available.")
+
+
+IMAGE_MODEL_OPTIONS = [
+    "gemini-3-pro-image-preview",
+    "gemini-3.1-flash-image-preview",
+    "nano-banana-2",
+    "gemini-3.1-flash-image",
+    "gemini-2.5-flash-image",
+    "nano-banana-pro",
+    "nano-banana",
+]
+
+IMAGE_MODEL_ALIASES = {
+    "gemini-3-pro-image-preview": ["gemini-3-pro-image-preview"],
+    "nano-banana-pro": ["gemini-3-pro-image-preview"],
+    "gemini-3.1-flash-image-preview": [
+        "gemini-3.1-flash-image-preview",
+        "gemini-3.1-flash-image",
+    ],
+    "gemini-3.1-flash-image": [
+        "gemini-3.1-flash-image",
+        "gemini-3.1-flash-image-preview",
+    ],
+    "nano-banana-2": [
+        "gemini-3.1-flash-image-preview",
+        "gemini-3.1-flash-image",
+    ],
+    "nanobanana-2": [
+        "gemini-3.1-flash-image-preview",
+        "gemini-3.1-flash-image",
+    ],
+    "nanobanana2": [
+        "gemini-3.1-flash-image-preview",
+        "gemini-3.1-flash-image",
+    ],
+    # Legacy Nano Banana model kept for backward compatibility.
+    "gemini-2.5-flash-image": [
+        "gemini-2.5-flash-image",
+        "gemini-3.1-flash-image-preview",
+    ],
+    "nano-banana": [
+        "gemini-2.5-flash-image",
+        "gemini-3.1-flash-image-preview",
+    ],
+}
+
+
+def _resolve_image_model_candidates(model: str) -> List[str]:
+    raw_model = (model or "").strip()
+    if not raw_model:
+        raise ValueError("Image model is required.")
+
+    model_key = raw_model.lower().replace("_", "-").replace(" ", "-")
+    if model_key in IMAGE_MODEL_ALIASES:
+        return _dedupe_keys(IMAGE_MODEL_ALIASES[model_key])
+
+    # Allow advanced users to pass direct Gemini image model strings.
+    if model_key.startswith("gemini-") and "image" in model_key:
+        return [raw_model]
+
+    supported_values = ", ".join(IMAGE_MODEL_OPTIONS)
+    raise ValueError(
+        f"Unsupported image model '{model}'. Supported values: {supported_values}."
+    )
+
+
+def _run_with_model_fallback(model_candidates: List[str], request_fn):
+    last_model_error = None
+    for candidate in model_candidates:
+        try:
+            return request_fn(candidate)
+        except Exception as exc:
+            if _is_model_error(exc):
+                last_model_error = exc
+                continue
+            raise
+
+    tried = ", ".join(model_candidates)
+    if last_model_error is not None:
+        raise ValueError(
+            f"None of the image model aliases worked. Tried: {tried}. "
+            f"Last model error: {last_model_error}"
+        ) from last_model_error
+    raise ValueError(f"No valid image model candidates. Tried: {tried}.")
 
 
 def _tensor_to_part(image_tensor: torch.Tensor, media_resolution: Optional[str]) -> types.Part:
@@ -411,7 +524,7 @@ class GeminiSeedInt32:
 
 class Gemini3ProImagePreview:
     """
-    Image generation node for gemini-3-pro-image-preview with aspect ratio and resolution controls.
+    Image generation/editing node with aspect ratio and resolution controls.
     """
 
     @classmethod
@@ -420,7 +533,7 @@ class Gemini3ProImagePreview:
             "required": {
                 "api_key": ("STRING", {"default": "", "multiline": False}),
                 "prompt": ("STRING", {"default": "Generate a cinematic landscape", "multiline": True}),
-                "model": (["gemini-3-pro-image-preview"], {"default": "gemini-3-pro-image-preview"}),
+                "model": (IMAGE_MODEL_OPTIONS, {"default": "gemini-3-pro-image-preview"}),
                 "aspect_ratio": (
                     ["auto", "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"],
                     {"default": "1:1"},
@@ -473,6 +586,7 @@ class Gemini3ProImagePreview:
             raise ValueError("Prompt is required.")
 
         api_keys = _resolve_api_keys(api_key)
+        model_candidates = _resolve_image_model_candidates(model)
 
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
         reference_images = [
@@ -513,10 +627,13 @@ class Gemini3ProImagePreview:
             config_kwargs["seed"] = resolved_seed
 
         def _request(client):
-            return client.models.generate_content(
-                model=model,
-                contents=[types.Content(role="user", parts=parts)],
-                config=types.GenerateContentConfig(**config_kwargs),
+            return _run_with_model_fallback(
+                model_candidates,
+                lambda resolved_model: client.models.generate_content(
+                    model=resolved_model,
+                    contents=[types.Content(role="user", parts=parts)],
+                    config=types.GenerateContentConfig(**config_kwargs),
+                ),
             )
 
         response = _run_with_key_rotation(api_keys, _request)

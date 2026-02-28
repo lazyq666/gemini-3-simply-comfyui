@@ -6,13 +6,13 @@ Lightweight ComfyUI nodes for Gemini 3 preview models, plus a seed helper and a 
 
 ## Features / 功能
 - Text + multimodal prompting for `gemini-3-pro-preview`.
-- Image generation for `gemini-3-pro-image-preview` with aspect ratio and size controls.
+- Image generation/editing for Gemini image models, including Nano Banana 2 (`gemini-3.1-flash-image-preview`) and Nano Banana Pro (`gemini-3-pro-image-preview`).
 - Seed helper to normalize any value into Gemini's signed int32 range.
 - 3D camera prompt widget with snapping camera angles and optional background image.
 ![alt text](3dCamera.png)
 
 - 支持 `gemini-3-pro-preview` 的文本/多模态输入。
-- 支持 `gemini-3-pro-image-preview` 的图像生成（比例与尺寸可控）。
+- 支持 Gemini 图像模型（含 Nano Banana 2：`gemini-3.1-flash-image-preview`、Nano Banana Pro：`gemini-3-pro-image-preview`）的图像生成/编辑。
 - Seed 辅助节点将任意数值归一到 Gemini 的 int32 范围。
 - 3D 相机提示词控件（角度自动吸附，可显示输入图像）。
 
@@ -50,11 +50,29 @@ pip install -r requirements.txt
 文本/多模态节点，支持最多 10 张图像输入，返回文本结果。
 
 ### Gemini 3 Pro Image
-- **Model**: `gemini-3-pro-image-preview`
+- **Model options**:
+  - `gemini-3-pro-image-preview` (Nano Banana Pro)
+  - `gemini-3.1-flash-image-preview` (Nano Banana 2)
+  - `nano-banana-2` (alias)
+  - `gemini-3.1-flash-image` (fallback alias)
+  - `gemini-2.5-flash-image` / `nano-banana` (legacy compatibility)
 - **Inputs**: `prompt`, optional `reference_image`...`reference_image_10`, `aspect_ratio`, `image_size`, `seed`
 - **Outputs**: `image` + `text`
 
-图像生成节点，支持参考图像、比例与尺寸控制，返回图像和模型文本。
+图像生成/编辑节点，支持参考图像、比例与尺寸控制，返回图像和模型文本。
+
+## Image Model Aliases / 图像模型别名与回退
+- `nano-banana-2` 会优先尝试 `gemini-3.1-flash-image-preview`，若文档/版本差异导致不可用，会自动回退尝试 `gemini-3.1-flash-image`。
+- `gemini-3.1-flash-image` 也会反向回退尝试 `gemini-3.1-flash-image-preview`。
+- `gemini-2.5-flash-image` 与 `nano-banana` 保留兼容（旧工作流不受影响）。
+- `nano-banana-pro` 映射为 `gemini-3-pro-image-preview`。
+- 若输入不支持的模型值，节点会报错并列出可用值。
+
+- `nano-banana-2` 默认映射到 `gemini-3.1-flash-image-preview`，若因命名差异不可用，会自动尝试 `gemini-3.1-flash-image`。
+- `gemini-3.1-flash-image` 也会自动回退尝试 `gemini-3.1-flash-image-preview`。
+- `gemini-2.5-flash-image` 与 `nano-banana` 继续兼容旧流程。
+- `nano-banana-pro` 映射到 `gemini-3-pro-image-preview`。
+- 输入不支持的模型值会返回清晰报错并列出可选值。
 
 ### Gemini Seed (int32)
 - **Inputs**: `seed`, `mode` (`random_if_negative`, `wrap`, `clamp`)
