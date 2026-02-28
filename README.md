@@ -62,11 +62,11 @@ pip install -r requirements.txt
 图像生成/编辑节点，支持参考图像、比例与尺寸控制，返回图像和模型文本。
 
 ## Image Model Aliases / 图像模型别名与回退
-- `nano-banana-2` 会优先尝试 `gemini-3.1-flash-image-preview`，若文档/版本差异导致不可用，会自动回退尝试 `gemini-3.1-flash-image`。
-- `gemini-3.1-flash-image` 也会反向回退尝试 `gemini-3.1-flash-image-preview`。
-- `gemini-2.5-flash-image` 与 `nano-banana` 保留兼容（旧工作流不受影响）。
-- `nano-banana-pro` 映射为 `gemini-3-pro-image-preview`。
-- 若输入不支持的模型值，节点会报错并列出可用值。
+- `nano-banana-2` first tries `gemini-3.1-flash-image-preview`, then falls back to `gemini-3.1-flash-image` if needed.
+- `gemini-3.1-flash-image` also falls back to `gemini-3.1-flash-image-preview`.
+- `gemini-2.5-flash-image` and `nano-banana` are preserved for legacy compatibility.
+- `nano-banana-pro` maps to `gemini-3-pro-image-preview`.
+- Unsupported model values return a clear error with supported options.
 
 - `nano-banana-2` 默认映射到 `gemini-3.1-flash-image-preview`，若因命名差异不可用，会自动尝试 `gemini-3.1-flash-image`。
 - `gemini-3.1-flash-image` 也会自动回退尝试 `gemini-3.1-flash-image-preview`。
