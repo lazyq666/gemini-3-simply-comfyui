@@ -56,8 +56,10 @@ pip install -r requirements.txt
   - `nano-banana-2`
 - **Inputs**: `prompt`, optional `reference_image`...`reference_image_10`, `aspect_ratio`, `image_size`, `seed`
 - **Outputs**: `image` + `text`
+- **Aspect ratio options**: `auto`, `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `4:1`, `1:4`, `8:1`, `1:8`
 
 图像生成/编辑节点，支持参考图像、比例与尺寸控制，返回图像和模型文本。
+比例可选值：`auto`、`1:1`、`2:3`、`3:2`、`3:4`、`4:3`、`4:5`、`5:4`、`9:16`、`16:9`、`21:9`、`4:1`、`1:4`、`8:1`、`1:8`。
 
 ## Image Model Aliases / 图像模型别名与回退
 - `nano-banana-pro` maps to `gemini-3-pro-image-preview`.
