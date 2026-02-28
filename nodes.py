@@ -122,13 +122,13 @@ def _run_with_key_rotation(api_keys: List[str], request_fn):
 
 IMAGE_MODEL_OPTIONS = [
     "nano-banana-pro",
-    "nano-banan",
+    "nano-banana",
     "nano-banana-2",
 ]
 
 IMAGE_MODEL_ALIASES = {
     "nano-banana-pro": ["gemini-3-pro-image-preview"],
-    "nano-banan": [
+    "nano-banana": [
         "gemini-2.5-flash-image",
         "gemini-3.1-flash-image-preview",
     ],

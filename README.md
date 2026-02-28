@@ -52,7 +52,7 @@ pip install -r requirements.txt
 ### Gemini 3 Pro Image
 - **Model options**:
   - `nano-banana-pro`
-  - `nano-banan`
+  - `nano-banana`
   - `nano-banana-2`
 - **Inputs**: `prompt`, optional `reference_image`...`reference_image_10`, `aspect_ratio`, `image_size`, `seed`
 - **Outputs**: `image` + `text`
@@ -61,12 +61,12 @@ pip install -r requirements.txt
 
 ## Image Model Aliases / 图像模型别名与回退
 - `nano-banana-pro` maps to `gemini-3-pro-image-preview`.
-- `nano-banan` first tries `gemini-2.5-flash-image`, then falls back to `gemini-3.1-flash-image-preview` if needed.
+- `nano-banana` first tries `gemini-2.5-flash-image`, then falls back to `gemini-3.1-flash-image-preview` if needed.
 - `nano-banana-2` first tries `gemini-3.1-flash-image-preview`, then falls back to `gemini-3.1-flash-image` if needed.
 - Unsupported model values return a clear error listing only these three accepted options.
 
 - `nano-banana-pro` 映射到 `gemini-3-pro-image-preview`。
-- `nano-banan` 默认映射到 `gemini-2.5-flash-image`，若不可用会自动回退尝试 `gemini-3.1-flash-image-preview`。
+- `nano-banana` 默认映射到 `gemini-2.5-flash-image`，若不可用会自动回退尝试 `gemini-3.1-flash-image-preview`。
 - `nano-banana-2` 默认映射到 `gemini-3.1-flash-image-preview`，若不可用会自动尝试 `gemini-3.1-flash-image`。
 - 输入不支持的模型值会返回清晰报错，且仅列出这 3 个可选值。
 
