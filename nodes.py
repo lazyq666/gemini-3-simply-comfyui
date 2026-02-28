@@ -121,46 +121,20 @@ def _run_with_key_rotation(api_keys: List[str], request_fn):
 
 
 IMAGE_MODEL_OPTIONS = [
-    "gemini-3-pro-image-preview",
-    "gemini-3.1-flash-image-preview",
-    "nano-banana-2",
-    "gemini-3.1-flash-image",
-    "gemini-2.5-flash-image",
     "nano-banana-pro",
-    "nano-banana",
+    "nano-banan",
+    "nano-banana-2",
 ]
 
 IMAGE_MODEL_ALIASES = {
-    "gemini-3-pro-image-preview": ["gemini-3-pro-image-preview"],
     "nano-banana-pro": ["gemini-3-pro-image-preview"],
-    "gemini-3.1-flash-image-preview": [
-        "gemini-3.1-flash-image-preview",
-        "gemini-3.1-flash-image",
-    ],
-    "gemini-3.1-flash-image": [
-        "gemini-3.1-flash-image",
+    "nano-banan": [
+        "gemini-2.5-flash-image",
         "gemini-3.1-flash-image-preview",
     ],
     "nano-banana-2": [
         "gemini-3.1-flash-image-preview",
         "gemini-3.1-flash-image",
-    ],
-    "nanobanana-2": [
-        "gemini-3.1-flash-image-preview",
-        "gemini-3.1-flash-image",
-    ],
-    "nanobanana2": [
-        "gemini-3.1-flash-image-preview",
-        "gemini-3.1-flash-image",
-    ],
-    # Legacy Nano Banana model kept for backward compatibility.
-    "gemini-2.5-flash-image": [
-        "gemini-2.5-flash-image",
-        "gemini-3.1-flash-image-preview",
-    ],
-    "nano-banana": [
-        "gemini-2.5-flash-image",
-        "gemini-3.1-flash-image-preview",
     ],
 }
 
@@ -173,10 +147,6 @@ def _resolve_image_model_candidates(model: str) -> List[str]:
     model_key = raw_model.lower().replace("_", "-").replace(" ", "-")
     if model_key in IMAGE_MODEL_ALIASES:
         return _dedupe_keys(IMAGE_MODEL_ALIASES[model_key])
-
-    # Allow advanced users to pass direct Gemini image model strings.
-    if model_key.startswith("gemini-") and "image" in model_key:
-        return [raw_model]
 
     supported_values = ", ".join(IMAGE_MODEL_OPTIONS)
     raise ValueError(
@@ -533,7 +503,7 @@ class Gemini3ProImagePreview:
             "required": {
                 "api_key": ("STRING", {"default": "", "multiline": False}),
                 "prompt": ("STRING", {"default": "Generate a cinematic landscape", "multiline": True}),
-                "model": (IMAGE_MODEL_OPTIONS, {"default": "gemini-3-pro-image-preview"}),
+                "model": (IMAGE_MODEL_OPTIONS, {"default": "nano-banana-pro"}),
                 "aspect_ratio": (
                     ["auto", "1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"],
                     {"default": "1:1"},
