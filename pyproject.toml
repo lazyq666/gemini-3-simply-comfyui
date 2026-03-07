@@ -20,7 +20,7 @@ license = {file = "LICENSE"}
 #     "Environment :: GPU :: Apple Metal",    # Apple Metal support
 # ]
 
-dependencies = ["google-genai>=1.7.0"]
+dependencies = ["google-genai>=1.7.0,<2.0.0"]
 
 [project.urls]
 Repository = "https://github.com/lazyq666/gemini-3-simply-comfyui"
@@ -34,4 +34,3 @@ DisplayName = "gemini-3-simply-comfyui"
 Icon = ""
 includes = [] 
 # "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
-

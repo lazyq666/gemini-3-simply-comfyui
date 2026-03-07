@@ -9,8 +9,23 @@ from typing import List, Optional
 import numpy as np
 import torch
 from PIL import Image
-from google import genai
-from google.genai import types
+
+MISSING_GOOGLE_GENAI_MSG = (
+    "Missing dependency 'google-genai'. Install it in the same Python environment that runs ComfyUI, "
+    "then restart ComfyUI. Example commands:\n"
+    "  python -m pip install -r custom_nodes/gemini3/requirements.txt\n"
+    "  python -m pip install \"google-genai>=1.7.0,<2.0.0\""
+)
+
+try:
+    from google import genai
+    from google.genai import types
+except ModuleNotFoundError as exc:
+    if (exc.name or "").startswith("google"):
+        raise ModuleNotFoundError(MISSING_GOOGLE_GENAI_MSG) from exc
+    raise
+except ImportError as exc:
+    raise ImportError(f"{MISSING_GOOGLE_GENAI_MSG}\nOriginal import error: {exc}") from exc
 
 
 CONFIG_FILENAME = "config.json"

@@ -31,6 +31,16 @@ pip install -r requirements.txt
 2) 将 `config.example.json` 复制为 `config.json` 并填写 API key。
 3) 重启 ComfyUI。
 
+If you see `No module named 'google'` on macOS, install in the Python environment used by ComfyUI:
+```
+python3 -m pip install -r requirements.txt
+```
+
+如果 macOS 出现 `No module named 'google'`，请在 ComfyUI 实际使用的 Python 环境里安装依赖：
+```
+python3 -m pip install -r requirements.txt
+```
+
 ## API Keys / API 密钥
 - Preferred: put keys in `config.json` (ignored by git).
 - Fallback: set `GEMINI_API_KEY` in your environment.
