@@ -135,11 +135,63 @@ def _run_with_key_rotation(api_keys: List[str], request_fn):
     raise ValueError("No valid API key available.")
 
 
+TEXT_MODEL_OPTIONS = [
+    "gemini-3-pro-preview",
+    "gemini-3-flash-preview",
+    "gemini-2.5-pro",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+]
+
+TEXT_MODEL_ALIASES = {
+    "gemini-3-pro-preview": "gemini-3-pro-preview",
+    "gemini-3-flash-preview": "gemini-3-flash-preview",
+    "gemini-2.5-pro": "gemini-2.5-pro",
+    "gemini-2.5-flash": "gemini-2.5-flash",
+    "gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
+}
+
+
+def _resolve_text_model(model: str) -> str:
+    raw_model = (model or "").strip()
+    if not raw_model:
+        return TEXT_MODEL_OPTIONS[0]
+
+    model_key = raw_model.lower().replace("_", "-").replace(" ", "-")
+    if model_key in TEXT_MODEL_ALIASES:
+        return TEXT_MODEL_ALIASES[model_key]
+
+    supported_values = ", ".join(TEXT_MODEL_OPTIONS)
+    raise ValueError(
+        f"Unsupported text model '{model}'. Supported values: {supported_values}."
+    )
+
+
 IMAGE_MODEL_OPTIONS = [
     "nano-banana-pro",
     "nano-banana",
     "nano-banana-2",
 ]
+
+IMAGE_SIZE_OPTIONS = [
+    "0.5K",
+    "1K",
+    "2K",
+    "4K",
+]
+
+IMAGE_SIZE_ALIASES = {
+    "0.5k": "512",
+    "512": "512",
+    "1k": "1K",
+    "2k": "2K",
+    "4k": "4K",
+}
+
+IMAGE_SIZE_512_SUPPORTED_MODELS = {
+    "gemini-3.1-flash-image-preview",
+    "gemini-3.1-flash-image",
+}
 
 IMAGE_MODEL_ALIASES = {
     "nano-banana-pro": ["gemini-3-pro-image-preview"],
@@ -166,6 +218,39 @@ def _resolve_image_model_candidates(model: str) -> List[str]:
     supported_values = ", ".join(IMAGE_MODEL_OPTIONS)
     raise ValueError(
         f"Unsupported image model '{model}'. Supported values: {supported_values}."
+    )
+
+
+def _normalize_image_size(image_size: str) -> str:
+    raw_image_size = (image_size or "").strip()
+    if not raw_image_size:
+        return "1K"
+
+    image_size_key = raw_image_size.lower().replace(" ", "")
+    if image_size_key in IMAGE_SIZE_ALIASES:
+        return IMAGE_SIZE_ALIASES[image_size_key]
+
+    supported_values = ", ".join(IMAGE_SIZE_OPTIONS)
+    raise ValueError(
+        f"Unsupported image_size '{image_size}'. Supported values: {supported_values}. "
+        "For 0.5K, the Gemini API expects the literal value '512'."
+    )
+
+
+def _resolve_image_model_candidates_for_size(model_candidates: List[str], image_size: str) -> List[str]:
+    if image_size != "512":
+        return model_candidates
+
+    compatible_models = [
+        candidate for candidate in model_candidates if candidate in IMAGE_SIZE_512_SUPPORTED_MODELS
+    ]
+    if compatible_models:
+        return compatible_models
+
+    tried = ", ".join(model_candidates)
+    raise ValueError(
+        "image_size 0.5K is currently only supported by Gemini 3.1 Flash Image models. "
+        f"Current resolved model candidates: {tried}."
     )
 
 
@@ -377,7 +462,7 @@ class Gemini3Camera3DPrompt:
 
 class Gemini3ProPreviewText:
     """
-    Text/multimodal node for gemini-3-pro-preview.
+    Text/multimodal node for Gemini text models.
     Accepts an optional pair of images that are sent with media resolution controls.
     """
 
@@ -387,8 +472,9 @@ class Gemini3ProPreviewText:
         return {
             "required": {
                 "api_key": ("STRING", {"default": "", "multiline": False}),
+                "system_doc": ("STRING", {"default": "", "multiline": True}),
                 "prompt": ("STRING", {"default": "Explain this image", "multiline": True}),
-                "model": (["gemini-3-pro-preview"], {"default": "gemini-3-pro-preview"}),
+                "model": (TEXT_MODEL_OPTIONS, {"default": TEXT_MODEL_OPTIONS[0]}),
                 "media_resolution": (
                     [
                         "auto",
@@ -415,6 +501,7 @@ class Gemini3ProPreviewText:
     def run(
         self,
         api_key: str,
+        system_doc: str,
         prompt: str,
         model: str,
         media_resolution: str,
@@ -435,6 +522,7 @@ class Gemini3ProPreviewText:
             raise ValueError("Prompt is required.")
 
         api_keys = _resolve_api_keys(api_key)
+        resolved_model = _resolve_text_model(model)
 
         resolution = None if media_resolution == "auto" else media_resolution
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
@@ -463,6 +551,14 @@ class Gemini3ProPreviewText:
             resolved_seed = parsed_seed
 
         config_kwargs = {"response_modalities": ["TEXT"]}
+        cleaned_system_doc = (system_doc or "").strip()
+        if cleaned_system_doc:
+            if not _supports_field(types.GenerateContentConfig, "system_instruction"):
+                raise ValueError(
+                    "The installed google-genai version does not support system_instruction. "
+                    "Please update the dependency, for example: google-genai>=1.7.0,<2.0.0"
+                )
+            config_kwargs["system_instruction"] = cleaned_system_doc
         if thinking_level != "default":
             config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_level=thinking_level)
         if _supports_field(types.GenerateContentConfig, "seed"):
@@ -470,7 +566,7 @@ class Gemini3ProPreviewText:
 
         def _request(client):
             return client.models.generate_content(
-                model=model,
+                model=resolved_model,
                 contents=[types.Content(role="user", parts=parts)],
                 config=types.GenerateContentConfig(**config_kwargs),
             )
@@ -544,7 +640,7 @@ class Gemini3ProImagePreview:
                     {"default": "1:1"},
                 ),
                 "image_size": (
-                    ["1K", "2K", "4K"],
+                    IMAGE_SIZE_OPTIONS,
                     {"default": "1K"},
                 ),
                 "seed": ("INT", {"default": -1, "min": -1, "max": INT32_MAX}),
@@ -592,6 +688,10 @@ class Gemini3ProImagePreview:
 
         api_keys = _resolve_api_keys(api_key)
         model_candidates = _resolve_image_model_candidates(model)
+        resolved_image_size = _normalize_image_size(image_size)
+        model_candidates = _resolve_image_model_candidates_for_size(
+            model_candidates, resolved_image_size
+        )
 
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
         reference_images = [
@@ -622,7 +722,7 @@ class Gemini3ProImagePreview:
         else:
             resolved_seed = parsed_seed
 
-        image_config_kwargs = {"aspect_ratio": chosen_aspect, "image_size": image_size}
+        image_config_kwargs = {"aspect_ratio": chosen_aspect, "image_size": resolved_image_size}
         if _supports_field(types.ImageConfig, "seed"):
             image_config_kwargs["seed"] = resolved_seed
         image_config = types.ImageConfig(**image_config_kwargs)
@@ -670,7 +770,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Gemini3Camera3DPrompt": "3D Camera Prompt",
-    "Gemini3ProPreviewText": "Gemini 3 Pro (Text)",
+    "Gemini3ProPreviewText": "Gemini Text",
     "GeminiSeedInt32": "Gemini Seed (int32)",
     "Gemini3ProImagePreview": "Gemini 3 Pro Image",
 }

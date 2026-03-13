@@ -1,17 +1,17 @@
 # Gemini 3 Custom Nodes for ComfyUI
 
-Lightweight ComfyUI nodes for Gemini 3 preview models, plus a seed helper and a 3D camera prompt widget.
+Lightweight ComfyUI nodes for Gemini text/image models, plus a seed helper and a 3D camera prompt widget.
 
-适用于 Gemini 3 预览模型的轻量 ComfyUI 节点，包含种子辅助节点与 3D 相机提示词控件。
+适用于 Gemini 文本/图像模型的轻量 ComfyUI 节点，包含种子辅助节点与 3D 相机提示词控件。
 
 ## Features / 功能
-- Text + multimodal prompting for `gemini-3-pro-preview`.
+- Text + multimodal prompting for current Gemini text models, including `gemini-3-pro-preview`, `gemini-3-flash-preview`, and the `gemini-2.5-*` family.
 - Image generation/editing for Gemini image models, including Nano Banana 2 (`gemini-3.1-flash-image-preview`) and Nano Banana Pro (`gemini-3-pro-image-preview`).
 - Seed helper to normalize any value into Gemini's signed int32 range.
 - 3D camera prompt widget with snapping camera angles and optional background image.
 ![alt text](3dCamera.png)
 
-- 支持 `gemini-3-pro-preview` 的文本/多模态输入。
+- 支持当前 Gemini 文本/多模态模型，包括 `gemini-3-pro-preview`、`gemini-3-flash-preview` 和 `gemini-2.5-*` 系列。
 - 支持 Gemini 图像模型（含 Nano Banana 2：`gemini-3.1-flash-image-preview`、Nano Banana Pro：`gemini-3-pro-image-preview`）的图像生成/编辑。
 - Seed 辅助节点将任意数值归一到 Gemini 的 int32 范围。
 - 3D 相机提示词控件（角度自动吸附，可显示输入图像）。
@@ -52,12 +52,13 @@ python3 -m pip install -r requirements.txt
 
 ## Nodes / 节点说明
 
-### Gemini 3 Pro (Text)
-- **Model**: `gemini-3-pro-preview`
-- **Inputs**: `prompt`, optional `image_1`...`image_10`, `media_resolution`, `thinking_level`, `seed`
+### Gemini Text
+- **Model options**: `gemini-3-pro-preview`, `gemini-3-flash-preview`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`
+- **Inputs**: `system_doc`, `prompt`, optional `image_1`...`image_10`, `media_resolution`, `thinking_level`, `seed`
 - **Outputs**: `text`
 
 文本/多模态节点，支持最多 10 张图像输入，返回文本结果。
+`system_doc` 会通过 Gemini API 的 `system_instruction` 字段传给模型，不会直接拼接到用户 prompt 里。
 
 ### Gemini 3 Pro Image
 - **Model options**:
@@ -67,9 +68,12 @@ python3 -m pip install -r requirements.txt
 - **Inputs**: `prompt`, optional `reference_image`...`reference_image_10`, `aspect_ratio`, `image_size`, `seed`
 - **Outputs**: `image` + `text`
 - **Aspect ratio options**: `auto`, `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `4:1`, `1:4`, `8:1`, `1:8`
+- **Image size options**: `0.5K`, `1K`, `2K`, `4K` (`0.5K` is sent to Gemini as `512`)
 
 图像生成/编辑节点，支持参考图像、比例与尺寸控制，返回图像和模型文本。
 比例可选值：`auto`、`1:1`、`2:3`、`3:2`、`3:4`、`4:3`、`4:5`、`5:4`、`9:16`、`16:9`、`21:9`、`4:1`、`1:4`、`8:1`、`1:8`。
+尺寸可选值：`0.5K`、`1K`、`2K`、`4K`，其中 `0.5K` 会自动转换为 Gemini API 要求的 `512`。
+`0.5K` 目前仅对 Gemini 3.1 Flash Image 系列生效，因此建议配合 `nano-banana-2` 使用；若使用 `nano-banana`，节点会自动跳过不兼容的 2.5 模型回退项。
 
 ## Image Model Aliases / 图像模型别名与回退
 - `nano-banana-pro` maps to `gemini-3-pro-image-preview`.

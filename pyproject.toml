@@ -1,6 +1,6 @@
 [project]
 name = "gemini-3-simply-comfyui"
-description = "Two lightweight ComfyUI nodes for Gemini 3 preview models: Gemini 3 Pro (Text) and Gemini 3 Pro Image. (Description by CC)"
+description = "Two lightweight ComfyUI nodes for Gemini models: Gemini Text and Gemini 3 Pro Image. (Description by CC)"
 version = "1.0.0"
 license = {file = "LICENSE"} 
 # classifiers = [
