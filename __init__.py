@@ -1,7 +1,11 @@
+import os
+
+
+MODULE_DIRNAME = os.path.basename(os.path.dirname(__file__))
 MISSING_DEP_LOAD_HINT = (
     "Failed to load gemini3 nodes because dependency 'google-genai' is missing. "
     "Install requirements in ComfyUI's Python environment and restart ComfyUI.\n"
-    "Example: python -m pip install -r custom_nodes/gemini3/requirements.txt"
+    f"Example: python -m pip install -r custom_nodes/{MODULE_DIRNAME}/requirements.txt"
 )
 
 try:

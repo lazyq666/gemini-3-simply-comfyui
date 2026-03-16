@@ -13,7 +13,7 @@ from PIL import Image
 MISSING_GOOGLE_GENAI_MSG = (
     "Missing dependency 'google-genai'. Install it in the same Python environment that runs ComfyUI, "
     "then restart ComfyUI. Example commands:\n"
-    "  python -m pip install -r custom_nodes/gemini3/requirements.txt\n"
+    f"  python -m pip install -r custom_nodes/{os.path.basename(os.path.dirname(__file__))}/requirements.txt\n"
     "  python -m pip install \"google-genai>=1.7.0,<2.0.0\""
 )
 

@@ -31,6 +31,10 @@ pip install -r requirements.txt
 2) 将 `config.example.json` 复制为 `config.json` 并填写 API key。
 3) 重启 ComfyUI。
 
+If the node is placed directly under `custom_nodes`, ComfyUI will also try to auto-install `requirements.txt` on startup when `google-genai` is missing. Manual install is still the fallback if your environment blocks package installation.
+
+如果节点是直接放进 `custom_nodes` 目录，ComfyUI 在启动时检测到缺少 `google-genai` 后也会尝试自动安装 `requirements.txt`。如果当前环境不允许安装依赖，再手动执行上面的命令即可。
+
 If you see `No module named 'google'` on macOS, install in the Python environment used by ComfyUI:
 ```
 python3 -m pip install -r requirements.txt
