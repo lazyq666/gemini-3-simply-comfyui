@@ -180,6 +180,12 @@ IMAGE_SIZE_OPTIONS = [
     "4K",
 ]
 
+IMAGE_THINKING_LEVEL_OPTIONS = [
+    "default",
+    "minimal",
+    "high",
+]
+
 IMAGE_SIZE_ALIASES = {
     "0.5k": "512",
     "512": "512",
@@ -189,6 +195,11 @@ IMAGE_SIZE_ALIASES = {
 }
 
 IMAGE_SIZE_512_SUPPORTED_MODELS = {
+    "gemini-3.1-flash-image-preview",
+    "gemini-3.1-flash-image",
+}
+
+IMAGE_THINKING_LEVEL_SUPPORTED_MODELS = {
     "gemini-3.1-flash-image-preview",
     "gemini-3.1-flash-image",
 }
@@ -250,6 +261,29 @@ def _resolve_image_model_candidates_for_size(model_candidates: List[str], image_
     tried = ", ".join(model_candidates)
     raise ValueError(
         "image_size 0.5K is currently only supported by Gemini 3.1 Flash Image models. "
+        f"Current resolved model candidates: {tried}."
+    )
+
+
+def _resolve_image_model_candidates_for_thinking(
+    model_candidates: List[str], thinking_level: str
+) -> List[str]:
+    if thinking_level == "default":
+        return model_candidates
+
+    compatible_models = [
+        candidate
+        for candidate in model_candidates
+        if candidate in IMAGE_THINKING_LEVEL_SUPPORTED_MODELS
+    ]
+    if compatible_models:
+        return compatible_models
+
+    tried = ", ".join(model_candidates)
+    raise ValueError(
+        "thinking_level minimal/high is currently only supported by Gemini 3.1 Flash Image models. "
+        "Gemini 3 Pro Image Preview uses its default thinking behavior and does not expose "
+        "a thinking_level control in the Gemini API. "
         f"Current resolved model candidates: {tried}."
     )
 
@@ -643,6 +677,10 @@ class Gemini3ProImagePreview:
                     IMAGE_SIZE_OPTIONS,
                     {"default": "1K"},
                 ),
+                "thinking_level": (
+                    IMAGE_THINKING_LEVEL_OPTIONS,
+                    {"default": "default"},
+                ),
                 "seed": ("INT", {"default": -1, "min": -1, "max": INT32_MAX}),
             },
             "optional": {
@@ -671,6 +709,7 @@ class Gemini3ProImagePreview:
         model: str,
         aspect_ratio: str,
         image_size: str,
+        thinking_level: str,
         seed: int,
         reference_image=None,
         reference_image_2=None,
@@ -691,6 +730,9 @@ class Gemini3ProImagePreview:
         resolved_image_size = _normalize_image_size(image_size)
         model_candidates = _resolve_image_model_candidates_for_size(
             model_candidates, resolved_image_size
+        )
+        model_candidates = _resolve_image_model_candidates_for_thinking(
+            model_candidates, thinking_level
         )
 
         parts: List[types.Part] = [types.Part.from_text(text=prompt)]
@@ -728,6 +770,20 @@ class Gemini3ProImagePreview:
         image_config = types.ImageConfig(**image_config_kwargs)
 
         config_kwargs = {"response_modalities": ["IMAGE", "TEXT"], "image_config": image_config}
+        if thinking_level != "default":
+            if not _supports_field(types.GenerateContentConfig, "thinking_config"):
+                raise ValueError(
+                    "The installed google-genai version does not support thinking_config. "
+                    "Please update the dependency, for example: google-genai>=1.7.0,<2.0.0"
+                )
+            if not _supports_field(types.ThinkingConfig, "thinking_level"):
+                raise ValueError(
+                    "The installed google-genai version does not support ThinkingConfig.thinking_level. "
+                    "Please update the dependency, for example: google-genai>=1.7.0,<2.0.0"
+                )
+            config_kwargs["thinking_config"] = types.ThinkingConfig(
+                thinking_level=thinking_level
+            )
         if _supports_field(types.GenerateContentConfig, "seed"):
             config_kwargs["seed"] = resolved_seed
 

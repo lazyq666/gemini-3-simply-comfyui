@@ -69,15 +69,23 @@ python3 -m pip install -r requirements.txt
   - `nano-banana-pro`
   - `nano-banana`
   - `nano-banana-2`
-- **Inputs**: `prompt`, optional `reference_image`...`reference_image_10`, `aspect_ratio`, `image_size`, `seed`
+- **Inputs**: `prompt`, optional `reference_image`...`reference_image_10`, `aspect_ratio`, `image_size`, `thinking_level`, `seed`
 - **Outputs**: `image` + `text`
 - **Aspect ratio options**: `auto`, `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `4:1`, `1:4`, `8:1`, `1:8`
 - **Image size options**: `0.5K`, `1K`, `2K`, `4K` (`0.5K` is sent to Gemini as `512`)
+- **Thinking level options**: `default`, `minimal`, `high`
 
 图像生成/编辑节点，支持参考图像、比例与尺寸控制，返回图像和模型文本。
 比例可选值：`auto`、`1:1`、`2:3`、`3:2`、`3:4`、`4:3`、`4:5`、`5:4`、`9:16`、`16:9`、`21:9`、`4:1`、`1:4`、`8:1`、`1:8`。
 尺寸可选值：`0.5K`、`1K`、`2K`、`4K`，其中 `0.5K` 会自动转换为 Gemini API 要求的 `512`。
+`thinking_level` 目前仅对 Gemini 3.1 Flash Image 系列生效，可选 `minimal` / `high`；`nano-banana-pro` 对应的 Gemini 3 Pro Image Preview 按官方 API 说明使用默认 thinking，不能显式调级或关闭。
 `0.5K` 目前仅对 Gemini 3.1 Flash Image 系列生效，因此建议配合 `nano-banana-2` 使用；若使用 `nano-banana`，节点会自动跳过不兼容的 2.5 模型回退项。
+当 `thinking_level` 选择 `minimal` 或 `high` 且模型为 `nano-banana` 时，节点会自动跳过不支持该参数的 2.5 Image 候选，转而使用 3.1 Flash Image 候选。
+当 `thinking_level=default` 或不传该参数时：
+- `nano-banana-pro` 使用 `gemini-3-pro-image-preview` 的默认动态 `high` thinking。
+- `nano-banana-2` 使用 `gemini-3.1-flash-image-preview` / `gemini-3.1-flash-image` 的默认动态 `high` thinking。
+- `nano-banana` 优先使用 `gemini-2.5-flash-image`，其默认行为是 2.5 系列的动态 thinking（不是 `thinking_level` 接口）；只有回退到 3.1 Flash Image 时，才是默认动态 `high` thinking。
+当模型为 `nano-banana-pro` 且 `thinking_level` 选择 `minimal` 或 `high` 时，节点会直接报错，因为 Gemini 3 Pro Image Preview 不支持显式设置 `thinking_level`。
 
 ## Image Model Aliases / 图像模型别名与回退
 - `nano-banana-pro` maps to `gemini-3-pro-image-preview`.
